@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+use Jarvis\Vendor\Output\Message;
+use Jarvis\Vendor\Application;
+
+try {
+    require 'autoloader.php';
+    $app = new Application($argv);
+    $app->run();
+} catch (\Exception $e) {
+    Message::error($e->getMessage());
+}
