@@ -20,19 +20,7 @@ class Application
         $commandClass = AbstractCommand::getCommandClass($this->commandData->command);
         // Создаем экземпляр команды
         $commandEntity = new $commandClass($this->commandData);
-        // Вызываем метод конфигурации команды
-        $commandEntity->configure();
-        // Если аргумент только один = help, вызываем метод отображения информации о команде
-        if (count($this->commandData->arguments) === 1 &&
-            strtolower($this->commandData->arguments[0]) === 'help' &&
-            empty($this->commandData->options)) {
-            $commandEntity->help();
-        }
-        // В противном случае валидируем и вызываем команду
-        else {
-
-            $commandEntity->validate();
-            $commandEntity->execute();
-        }
+        // Вызываем команду
+        $commandEntity->execute();
     }
 }

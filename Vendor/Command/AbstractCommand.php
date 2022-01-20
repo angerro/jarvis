@@ -23,11 +23,21 @@ abstract class AbstractCommand
     private const CONFIGURE_ERROR = "Ошибка конфигурации команды: ";
     private const FORMAT_ERROR = "Ошибка формата команды: ";
 
-    public function __construct(CommandData $commandData)
+    /**
+     * Конструктор экземпляра команды
+     * @param CommandData $commandData - экземпляр входящей команды
+     * @param bool $controlData - запускать ли метод валидации введенной команды
+     * @throws \Exception
+     */
+    public function __construct(CommandData $commandData, bool $controlData = true)
     {
         $this->commandData = $commandData;
         if (empty(static::$name)) {
             throw new \Exception(self::CONFIGURE_ERROR . "Не задано название команды");
+        }
+        $this->configure();
+        if ($controlData) {
+            $this->controlData();
         }
     }
 
@@ -46,31 +56,14 @@ abstract class AbstractCommand
     abstract public function execute();
 
     /**
-     * Вывод информации о команде: её аргументах и опциях.
+     * Возвращает объявленные аргументы или опции команды
+     * @param string $type
+     * @return array|void
      */
-    public function help()
+    public function getConfig(string $type)
     {
-        $commandName = static::$name;
-        $commandDescription = static::$description;
-        Message::success("Команда $commandName");
-        if ($commandDescription) {
-            Message::info($commandDescription);
-        }
-        if (!empty($this->arguments)) {
-            Message::warning("Аргументы:");
-            foreach ($this->arguments as $key => $argument) {
-                $isRequired = $argument->isRequired() ? '(обязательный)' : '(необязательный)';
-                $number = $key + 1;
-                Message::info("{$number}. {$argument->getName()} {$isRequired}: {$argument->getDescription()}");
-            }
-        }
-        if (!empty($this->options)) {
-            Message::warning("Опции:");
-            foreach ($this->options as $option) {
-                $isValueRequired = $option->isValueRequired() ? '(значение обязательно)' : '';
-                Message::info("-- {$option->getName()} {$isValueRequired}: {$option->getDescription()}");
-            }
-        }
+        if ($type === 'arguments') return $this->arguments;
+        if ($type === 'options') return $this->options;
     }
 
     /**
@@ -209,11 +202,9 @@ abstract class AbstractCommand
      * - поиск обязательных аргументов отсутствующих в команде
      * - поиск необъявленных опций
      * - поиск опций без значения, которые были объявлены с обязательным заполнением значения
-     *
-     * Этот метод можно переопределить в классах-наследниках и добавить свою логику валидации.
      * @throws \Exception
      */
-    public function validate()
+    private function controlData()
     {
         // Ищем необъявленные аргументы
         if (count($this->commandData->arguments) > count($this->arguments)) {
@@ -249,6 +240,18 @@ abstract class AbstractCommand
                 }
             }
         }
+
+        // Запускаем метод валидации класса-наследника
+        $this->validate();
+    }
+
+    /**
+     * Метод валидации, определяемый в классе-наследнике
+     * В него можно добавить свою логику валидации.
+     */
+    protected function validate()
+    {
+
     }
 
 }

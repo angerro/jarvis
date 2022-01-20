@@ -2,6 +2,7 @@
 
 return [
     'commands' => [
-        'Jarvis\Commands\TestCommand',
+        'Jarvis\Commands\Help',
+        'Jarvis\Commands\Test',
     ],
 ];
