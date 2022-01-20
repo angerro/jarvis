@@ -5,10 +5,10 @@ namespace Jarvis\Commands;
 use Jarvis\Vendor\Command\AbstractCommand;
 use Jarvis\Vendor\Output\Message;
 
-class Test extends AbstractCommand
+class Example extends AbstractCommand
 {
-    public static $name = 'test';
-    public static $description = 'Тестовая команда для демонстрации работы консольного приложения Jarvis';
+    public static $name = 'example';
+    public static $description = 'Команда для демонстрации работы консольного приложения Jarvis';
 
     public function configure()
     {

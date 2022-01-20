@@ -5,7 +5,7 @@ namespace Jarvis\Vendor\Command;
 use Jarvis\Vendor\Input\CommandData;
 use Jarvis\Vendor\Input\Argument;
 use Jarvis\Vendor\Input\Option;
-use Jarvis\Vendor\Output\Message;
+use Jarvis\Vendor\Config;
 
 abstract class AbstractCommand
 {
@@ -13,6 +13,7 @@ abstract class AbstractCommand
     public static $name;
     // Описание команды
     public static $description;
+
     // Экземпляр CommandData
     private $commandData;
     // Массив аргументов, полученных из метода конфигурации команды
@@ -60,7 +61,7 @@ abstract class AbstractCommand
      * @param string $type
      * @return array|void
      */
-    public function getConfig(string $type)
+    protected function getConfig(string $type)
     {
         if ($type === 'arguments') return $this->arguments;
         if ($type === 'options') return $this->options;
@@ -74,8 +75,7 @@ abstract class AbstractCommand
      */
     public static function getCommandClass(string $command): string
     {
-        $config = include dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'config.php';
-        foreach ($config['commands'] as $commandClass) {
+        foreach (Config::get('commands') as $commandClass) {
             if ($commandClass::$name === $command) {
                 return $commandClass;
             }

@@ -3,6 +3,6 @@
 return [
     'commands' => [
         'Jarvis\Commands\Help',
-        'Jarvis\Commands\Test',
+        'Jarvis\Commands\Example',
     ],
 ];

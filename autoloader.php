@@ -1,6 +1,6 @@
 <?php
 
-$config = include 'config.php';
+use Jarvis\Vendor\Config;
 
 spl_autoload_register(function ($class) {
     $pathParts = explode('\\', $class);
@@ -13,7 +13,9 @@ spl_autoload_register(function ($class) {
     }
 });
 
+Config::$data = include 'config.php';
+
 // Регистрируем команды
-foreach ($config['commands'] as $command){
+foreach (Config::get('commands') as $command){
     spl_autoload_call($command);
 }
