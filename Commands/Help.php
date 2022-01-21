@@ -30,8 +30,8 @@ class Help extends AbstractCommand
 
     private function list()
     {
-        Message::success("Консольная утилита Jarvis (◕‿◕)");
-        Message::success("-------------------------------");
+        Message::success("Консольная утилита Jarvis");
+        Message::success("-------------------------");
         if (empty(Config::get('commands'))) {
             Message::success('Ни одной команды не зарегистрировано. Для начала работы создайте хотя бы одну команду.');
         } else {
