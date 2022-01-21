@@ -2,30 +2,16 @@
 
 namespace Jarvis\Vendor\Input;
 
-class CommandData
+abstract class CommandData
 {
     public $command = null;
     public $arguments = [];
     public $options = [];
 
-    public function __construct($params)
+    public function __construct(array $params)
     {
-        // Парсинг параметров команды из консоли
-        foreach ($params as $key => $param) {
-            if ($key === 0) {
-                continue;
-            } elseif ($key === 1) {
-                $this->command = $param;
-            } elseif (substr($param, 0, 2) !== '--') {
-                $this->arguments[] = $param;
-            } else {
-                $option = substr($param, 2);
-                $optionParts = explode('=', $option);
-                $optionKey = $optionParts[0];
-                $optionValue = count($optionParts) > 1 ? substr($option, strlen($optionKey) + 1) : null;
-                $this->options[$optionKey][] = $optionValue;
-            }
-        }
-        // todo: Реализовать парсинг параметров из браузера
+        $this->parse($params);
     }
+
+    abstract protected function parse(array $params);
 }

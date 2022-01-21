@@ -3,10 +3,12 @@
 
 use Jarvis\Vendor\Output\Message;
 use Jarvis\Vendor\Application;
+use Jarvis\Vendor\Input\ArgvInput;
 
 try {
     require 'autoloader.php';
-    $app = new Application($argv);
+    $input = new ArgvInput($argv);
+    $app = new Application($input);
     $app->run();
 } catch (\Exception $e) {
     Message::error($e->getMessage());

@@ -68,6 +68,15 @@ abstract class AbstractCommand
     }
 
     /**
+     * Возвращает экземпляр CommandData
+     * @return CommandData
+     */
+    protected function getCommandData(): CommandData
+    {
+        return $this->commandData;
+    }
+
+    /**
      * Получение класса команды по ее названию
      * @param string $command - название команды
      * @return string

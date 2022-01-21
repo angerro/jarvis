@@ -1,11 +1,28 @@
 <?php
 
 use Jarvis\Vendor\Output\Message;
+use Jarvis\Vendor\Input\ArrayInput;
+use Jarvis\Vendor\Application;
 
 try {
-    require_once 'autoloader.php';
-    // todo: Реализовать пример вызова из браузера
-    Message::info('test');
+    require 'autoloader.php';
+    $input = new ArrayInput([
+        'command'   => 'example',
+        'arguments' => [
+            'Василий',
+            'Петрович'
+        ],
+        'options'   => [
+            'excellence' => [
+                'любит покушать',
+                'обожает сериалы',
+                'добряк'
+            ],
+            'job'        => null
+        ]
+    ]);
+    $app = new Application($input);
+    $app->run();
 } catch (\Exception $e) {
     Message::error($e->getMessage());
 }

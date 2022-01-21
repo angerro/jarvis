@@ -9,9 +9,9 @@ class Application
 {
     protected $commandData;
 
-    public function __construct($params)
+    public function __construct(CommandData $params)
     {
-        $this->commandData = new CommandData($params);
+        $this->commandData = $params;
     }
 
     public function run()

@@ -3,6 +3,8 @@
 namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
+use Jarvis\Vendor\Input\ArgvInput;
+use Jarvis\Vendor\Input\ArrayInput;
 use Jarvis\Vendor\Input\CommandData;
 use Jarvis\Vendor\Output\Message;
 use Jarvis\Vendor\Config;
@@ -46,7 +48,8 @@ class Help extends AbstractCommand
         // Определяем класс команды
         $commandClass = AbstractCommand::getCommandClass($command);
         // Создаем экземпляр команды
-        $commandEntity = new $commandClass(new CommandData([]), false);
+        $commandDataClass= get_class($this->getCommandData());
+        $commandEntity = new $commandClass(new $commandDataClass([]), false);
 
         Message::success("Команда $command");
         Message::success("----------------");
@@ -64,7 +67,7 @@ class Help extends AbstractCommand
         if (!empty($commandEntity->getConfig('options'))) {
             Message::success("Опции:");
             foreach ($commandEntity->getConfig('options') as $option) {
-                $isValueRequired = $option->isValueRequired() ? '(значение обязательно)' : '';
+                $isValueRequired = $option->isValueRequired() ? '(значение обязательно)' : '(значение необязательно)';
                 Message::info("-- {$option->getName()} {$isValueRequired}: {$option->getDescription()}");
             }
         }
