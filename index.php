@@ -10,7 +10,7 @@ try {
         'command'   => 'example',
         'arguments' => [
             'Василий',
-            'Петрович'
+            'Пупкин'
         ],
         'options'   => [
             'excellence' => [
