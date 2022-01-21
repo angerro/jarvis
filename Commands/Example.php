@@ -24,7 +24,7 @@ class Example extends AbstractCommand
         Message::success('Результат выполнения команды:');
         Message::info("Имя: ".$this->getArgument('name'));
         if ($this->hasArgument('surname')){
-            Message::info("Фамилия: ".$this->getArgument('name'));
+            Message::info("Фамилия: ".$this->getArgument('surname'));
         }
         if ($this->hasArgument('second-name')){
             Message::info("Отчество: ".$this->getArgument('second-name'));
