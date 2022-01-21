@@ -21,8 +21,8 @@ abstract class AbstractCommand
     // Массив опций, полученных из метода конфигурации команды
     private $options = [];
 
-    private const CONFIGURE_ERROR = "Ошибка конфигурации команды: ";
-    private const FORMAT_ERROR = "Ошибка формата команды: ";
+    protected const CONFIGURE_ERROR = "Ошибка конфигурации команды: ";
+    protected const FORMAT_ERROR = "Ошибка формата команды: ";
 
     /**
      * Конструктор экземпляра команды
