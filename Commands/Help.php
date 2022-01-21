@@ -3,9 +3,6 @@
 namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
-use Jarvis\Vendor\Input\ArgvInput;
-use Jarvis\Vendor\Input\ArrayInput;
-use Jarvis\Vendor\Input\CommandData;
 use Jarvis\Vendor\Output\Message;
 use Jarvis\Vendor\Config;
 
