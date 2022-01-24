@@ -11,7 +11,7 @@ class Browser extends AbstractMessage
         'success' => '#28a745'
     ];
 
-    public static function write(string $str, string $color): void
+    public static function write(string $str, string $color)
     {
         $string = '<pre style="color:' . self::COLORS[$color] . '">';
         $string .= htmlspecialchars($str);

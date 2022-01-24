@@ -6,5 +6,5 @@ abstract class AbstractMessage
 {
     const COLORS = [];
 
-    abstract public static function write(string $str, string $color): void;
+    abstract public static function write(string $str, string $color);
 }

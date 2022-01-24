@@ -16,22 +16,22 @@ class Message
         return PHP_SAPI === "cli" ? Console::class : Browser::class;
     }
 
-    public static function info(string $str): void
+    public static function info(string $str)
     {
         self::entity()::write($str, 'info');
     }
 
-    public static function error(string $str): void
+    public static function error(string $str)
     {
         self::entity()::write($str, 'error');
     }
 
-    public static function success(string $str): void
+    public static function success(string $str)
     {
         self::entity()::write($str, 'success');
     }
 
-    public static function warning(string $str): void
+    public static function warning(string $str)
     {
         self::entity()::write($str, 'warning');
     }

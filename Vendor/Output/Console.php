@@ -11,7 +11,7 @@ class Console extends AbstractMessage
         'success' => '0;32'
     ];
 
-    public static function write(string $str, string $color): void
+    public static function write(string $str, string $color)
     {
         echo "\033[" . self::COLORS[$color] . "m" . $str . "\033[0m" . PHP_EOL;
     }

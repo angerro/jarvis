@@ -10,6 +10,8 @@ try {
     $input = new ArgvInput($argv);
     $app = new Application($input);
     $app->run();
+    exit(0);
 } catch (\Exception $e) {
     Message::error($e->getMessage());
+    exit(1);
 }
