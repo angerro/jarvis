@@ -78,11 +78,11 @@ abstract class AbstractCommand
 
     /**
      * Получение класса команды по ее названию
-     * @param string $command - название команды
+     * @param $command - название команды
      * @return string
      * @throws \Exception
      */
-    public static function getCommandClass(string $command): string
+    public static function getCommandClass($command): string
     {
         foreach (Config::get('commands') as $commandClass) {
             if ($commandClass::$name === $command) {
