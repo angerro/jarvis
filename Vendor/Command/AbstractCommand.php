@@ -9,6 +9,7 @@ use Jarvis\Vendor\Input\CommandData;
 use Jarvis\Vendor\Input\Argument;
 use Jarvis\Vendor\Input\Option;
 use Jarvis\Vendor\Config;
+use Jarvis\Vendor\Output\AbstractOutput;
 
 //todo: сделать метод hasCommand
 
@@ -54,9 +55,10 @@ abstract class AbstractCommand
     /**
      * Метод реализующий команду.
      * Реализация этого метода обязательна в классах-наследниках.
+     * @param AbstractOutput $output - поток вывода
      * @return mixed
      */
-    abstract public function execute();
+    abstract public function execute(AbstractOutput $output);
 
     /**
      * Возвращает объявленные аргументы или опции команды

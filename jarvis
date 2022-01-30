@@ -1,17 +1,18 @@
 #!/usr/bin/env php
 <?php
 
-use Jarvis\Vendor\Output\Message;
+use Jarvis\Vendor\Output\Console;
 use Jarvis\Vendor\Application;
 use Jarvis\Vendor\Input\ArgvInput;
 
 try {
     require 'autoloader.php';
     $input = new ArgvInput($argv);
-    $app = new Application($input);
+    $output = new Console();
+    $app = new Application($input, $output);
     $app->run();
     exit(0);
 } catch (\Exception $e) {
-    Message::error($e->getMessage());
+    (new Console())->error($e->getMessage());
     exit(1);
 }

@@ -2,7 +2,7 @@
 
 namespace Jarvis\Vendor\Output;
 
-class Browser extends AbstractMessage
+class Browser extends AbstractOutput
 {
     const COLORS = [
         'error'   => '#dc3545',
@@ -11,7 +11,7 @@ class Browser extends AbstractMessage
         'success' => '#28a745'
     ];
 
-    public static function write(string $str, string $color)
+    public function write(string $str, string $color = 'info')
     {
         $string = '<pre style="color:' . self::COLORS[$color] . '">';
         $string .= htmlspecialchars($str);

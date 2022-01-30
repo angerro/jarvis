@@ -4,14 +4,17 @@ namespace Jarvis\Vendor;
 
 use Jarvis\Vendor\Input\CommandData;
 use Jarvis\Vendor\Command\AbstractCommand;
+use Jarvis\Vendor\Output\AbstractOutput;
 
 class Application
 {
     protected $commandData;
+    protected $output;
 
-    public function __construct(CommandData $params)
+    public function __construct(CommandData $params, AbstractOutput $output)
     {
         $this->commandData = $params;
+        $this->output = $output;
     }
 
     public function run()
@@ -21,6 +24,6 @@ class Application
         // Создаем экземпляр команды
         $commandEntity = new $commandClass($this->commandData);
         // Вызываем команду
-        $commandEntity->execute();
+        $commandEntity->execute($this->output);
     }
 }

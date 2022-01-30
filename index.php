@@ -1,6 +1,6 @@
 <?php
 
-use Jarvis\Vendor\Output\Message;
+use Jarvis\Vendor\Output\Browser;
 use Jarvis\Vendor\Input\ArrayInput;
 use Jarvis\Vendor\Application;
 
@@ -21,8 +21,9 @@ try {
             'job'        => null
         ]
     ]);
-    $app = new Application($input);
+    $output = new Browser();
+    $app = new Application($input, $output);
     $app->run();
 } catch (\Exception $e) {
-    Message::error($e->getMessage());
+    (new Browser())->error($e->getMessage());
 }

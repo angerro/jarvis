@@ -3,7 +3,7 @@
 namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
-use Jarvis\Vendor\Output\Message;
+use Jarvis\Vendor\Output\AbstractOutput;
 use Jarvis\Vendor\Config;
 
 class Help extends AbstractCommand
@@ -16,31 +16,31 @@ class Help extends AbstractCommand
         $this->addArgument('name', 'имя команды', false);
     }
 
-    public function execute()
+    public function execute(AbstractOutput $output)
     {
         if ($this->hasArgument('name')) {
-            $this->help($this->getArgument('name'));
+            $this->help($this->getArgument('name'), $output);
         } else {
-            $this->list();
+            $this->list($output);
         }
     }
 
-    private function list()
+    private function list(AbstractOutput $output)
     {
-        Message::success("Консольная утилита Jarvis");
-        Message::success("-------------------------");
+        $output->success("Консольная утилита Jarvis");
+        $output->success("-------------------------");
         if (empty(Config::get('commands'))) {
-            Message::success('Ни одной команды не зарегистрировано. Для начала работы создайте хотя бы одну команду.');
+            $output->success('Ни одной команды не зарегистрировано. Для начала работы создайте хотя бы одну команду.');
         } else {
-            Message::success("Доступные команды:");
+            $output->success("Доступные команды:");
         }
         foreach (Config::get('commands') as $commandClass) {
-            Message::info("- {$commandClass::$name}: {$commandClass::$description}");
+            $output->info("- {$commandClass::$name}: {$commandClass::$description}");
         }
-        Message::success('Для вывода подробной информации о команде можно воспользоваться следующим вызовом: "php jarvis {название команды} help" ');
+        $output->success('Для вывода подробной информации о команде можно воспользоваться следующим вызовом: "php jarvis {название команды} help" ');
     }
 
-    private function help($command)
+    private function help($command, AbstractOutput $output)
     {
         // Определяем класс команды
         $commandClass = AbstractCommand::getCommandClass($command);
@@ -48,24 +48,24 @@ class Help extends AbstractCommand
         $commandDataClass= get_class($this->getCommandData());
         $commandEntity = new $commandClass(new $commandDataClass([]), false);
 
-        Message::success("Команда $command");
-        Message::success("----------------");
+        $output->success("Команда $command");
+        $output->success("----------------");
         if ($commandClass::$description) {
-            Message::success($commandClass::$description);
+            $output->success($commandClass::$description);
         }
         if (!empty($commandEntity->getConfig('arguments'))) {
-            Message::success("Аргументы:");
+            $output->success("Аргументы:");
             foreach ($commandEntity->getConfig('arguments') as $key => $argument) {
                 $isRequired = $argument->isRequired() ? '(обязательный)' : '(необязательный)';
                 $number = $key + 1;
-                Message::info("{$number}. {$argument->getName()} {$isRequired}: {$argument->getDescription()}");
+                $output->info("{$number}. {$argument->getName()} {$isRequired}: {$argument->getDescription()}");
             }
         }
         if (!empty($commandEntity->getConfig('options'))) {
-            Message::success("Опции:");
+            $output->success("Опции:");
             foreach ($commandEntity->getConfig('options') as $option) {
                 $isValueRequired = $option->isValueRequired() ? '(значение обязательно)' : '(значение необязательно)';
-                Message::info("-- {$option->getName()} {$isValueRequired}: {$option->getDescription()}");
+                $output->info("-- {$option->getName()} {$isValueRequired}: {$option->getDescription()}");
             }
         }
     }

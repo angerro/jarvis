@@ -3,7 +3,7 @@
 namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
-use Jarvis\Vendor\Output\Message;
+use Jarvis\Vendor\Output\AbstractOutput;
 
 class Example extends AbstractCommand
 {
@@ -19,21 +19,21 @@ class Example extends AbstractCommand
              ->addOption('job', 'есть работа');
     }
 
-    public function execute()
+    public function execute(AbstractOutput $output)
     {
-        Message::success('Результат выполнения команды:');
-        Message::info("Имя: ".$this->getArgument('name'));
+        $output->success('Результат выполнения команды:');
+        $output->info("Имя: ".$this->getArgument('name'));
         if ($this->hasArgument('surname')){
-            Message::info("Фамилия: ".$this->getArgument('surname'));
+            $output->info("Фамилия: ".$this->getArgument('surname'));
         }
         if ($this->hasArgument('second-name')){
-            Message::info("Отчество: ".$this->getArgument('second-name'));
+            $output->info("Отчество: ".$this->getArgument('second-name'));
         }
         if ($this->hasOption('excellence')){
-            Message::info("Положительные качества: ". implode(', ', $this->getOption('excellence')));
+            $output->info("Положительные качества: ". implode(', ', $this->getOption('excellence')));
         }
         if ($this->hasOption('job')){
-            Message::info("Работа: есть");
+            $output->info("Работа: есть");
         }
     }
 }
