@@ -7,6 +7,9 @@ use Jarvis\Vendor\Input\Argument;
 use Jarvis\Vendor\Input\Option;
 use Jarvis\Vendor\Config;
 
+//todo: сделать метод hasCommand
+//todo: сделать кастомные классы исключений
+
 abstract class AbstractCommand
 {
     // Название команды. Обязательно для реализации в классах-наследниках.
@@ -18,7 +21,7 @@ abstract class AbstractCommand
     private $commandData;
     // Массив аргументов, полученных из метода конфигурации команды
     private $arguments = [];
-    // Массив опций, полученных из метода конфигурации команды
+    // Ассоциативный массив опций, полученных из метода конфигурации команды
     private $options = [];
 
     const CONFIGURE_ERROR = "Ошибка конфигурации команды: ";
@@ -60,11 +63,14 @@ abstract class AbstractCommand
      * Возвращает объявленные аргументы или опции команды
      * @param string $type
      * @return array|void
+     * @throws \Exception
      */
     protected function getConfig(string $type)
     {
-        if ($type === 'arguments') return $this->arguments;
-        if ($type === 'options') return $this->options;
+        if (in_array($type, ['arguments', 'options'])) {
+            return $this->$type;
+        }
+        throw new \Exception(self::CONFIGURE_ERROR . "Ошибка аргумента команды getConfig");
     }
 
     /**
@@ -103,18 +109,17 @@ abstract class AbstractCommand
      */
     protected function addArgument(string $name, string $description = '', bool $required = true): AbstractCommand
     {
+        // Проверка на дубликат названия аргумента
+        if ($this->hasArgument($name)){
+            throw new \Exception(self::CONFIGURE_ERROR . "Аргумент '{$name}' не может быть объявлен несколько раз");
+        }
+
         // Проверка на обязательный аргумент после необязательного
-        $lastArgument = $this->arguments[count($this->arguments) - 1];
+        $lastArgument = end($this->arguments);
         if ($lastArgument instanceof Argument && !$lastArgument->isRequired() && $required) {
             throw new \Exception(self::CONFIGURE_ERROR . "Обязательный аргумент '{$name}' объявлен после необязательного аргумента '{$lastArgument->getName()}'");
         }
 
-        // Проверка на дубликат названия аргумента
-        foreach ($this->arguments as $argument) {
-            if ($argument->getName() === $name) {
-                throw new \Exception(self::CONFIGURE_ERROR . "Аргумент '{$argument->getName()}' не может быть объявлен несколько раз");
-            }
-        }
         $this->arguments[] = new Argument($name, $description, $required);
         return $this;
     }
@@ -150,13 +155,9 @@ abstract class AbstractCommand
      */
     private function getRequiredArguments(): array
     {
-        $requiredArguments = $this->arguments;
-        foreach ($requiredArguments as $key => $argument) {
-            if (!$argument->isRequired()) {
-                unset($requiredArguments[$key]);
-            }
-        }
-        return $requiredArguments;
+        return array_filter($this->arguments, function ($argument){
+            return $argument->isRequired();
+        });
     }
 
     /**
@@ -169,12 +170,10 @@ abstract class AbstractCommand
      */
     protected function addOption(string $name, string $description = '', bool $valueRequired = false): AbstractCommand
     {
-        foreach ($this->options as $option) {
-            if ($option->getName() === $name) {
-                throw new \Exception(self::CONFIGURE_ERROR . "Опция '{$option->getName()}' не может быть объявлена несколько раз");
-            }
+        if (array_key_exists($name, $this->options)){
+            throw new \Exception(self::CONFIGURE_ERROR . "Опция '{$name}' не может быть объявлена несколько раз");
         }
-        $this->options[] = new Option($name, $description, $valueRequired);
+        $this->options[$name] = new Option($name, $description, $valueRequired);
         return $this;
     }
 
@@ -185,7 +184,7 @@ abstract class AbstractCommand
      */
     protected function getOption(string $optionName)
     {
-        if (!array_key_exists($optionName, $this->commandData->options)) {
+        if (!$this->hasOption($optionName)) {
             $option = null;
         } else if (count($this->commandData->options[$optionName]) === 1) {
             $option = $this->commandData->options[$optionName][0];
@@ -217,7 +216,8 @@ abstract class AbstractCommand
     {
         // Ищем необъявленные аргументы
         if (count($this->commandData->arguments) > count($this->arguments)) {
-            throw new \Exception(self::FORMAT_ERROR . "Указан необъявленный аргумент со значением '{$this->commandData->arguments[count($this->commandData->arguments) - 1]}'");
+            $lastCommandArgument = end($this->commandData->arguments);
+            throw new \Exception(self::FORMAT_ERROR . "Указан необъявленный аргумент со значением '{$lastCommandArgument}'");
         }
 
         // Ищем неопределённые обязательные аргументы
@@ -229,11 +229,7 @@ abstract class AbstractCommand
 
         // Ищем необъявленные опции
         foreach (array_keys($this->commandData->options) as $commandOptionName) {
-            $issetCommandOption = false;
-            foreach ($this->options as $option) {
-                if ($commandOptionName === $option->getName()) $issetCommandOption = true;
-            }
-            if (!$issetCommandOption) {
+            if (!array_key_exists($commandOptionName, $this->options)){
                 throw new \Exception(self::FORMAT_ERROR . "Указана необъявленная опция '{$commandOptionName}'");
             }
         }
