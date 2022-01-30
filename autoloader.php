@@ -15,7 +15,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-Config::$data = include 'config.php';
+Config::init(include 'config.php');
 
 // Регистрируем команды
 foreach (Config::get('commands') as $command){

@@ -2,9 +2,11 @@
 
 namespace Jarvis\Vendor;
 
+use Exception;
+
 class Config
 {
-    public static $data;
+    private static $data = null;
 
     private function __clone()
     {
@@ -14,6 +16,18 @@ class Config
     private function __construct()
     {
 
+    }
+
+    /**
+     * @param array $data
+     * @throws Exception
+     */
+    public static function init(array $data)
+    {
+        if (self::$data !== null) {
+            throw new Exception('Конфигурационный файл уже был проинициализирован');
+        }
+        self::$data = $data;
     }
 
     public static function get(...$keys)
