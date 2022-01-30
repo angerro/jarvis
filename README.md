@@ -44,12 +44,15 @@ class Example extends AbstractCommand
 В методе configure определяются аргументы и опции команды.
 
 Метод execute нужен для реализации логики самой команды на основе введённых аргументов и опций.
+Аргументом этого метода является экземпляр наследника класса AbstractOutput с помощью которого осуществляется вывод
+информации в консоль/браузер.
 ```
 <?php
 
 namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
+use Jarvis\Vendor\Output\AbstractOutput;
 
 class Example extends AbstractCommand
 {
@@ -61,7 +64,7 @@ class Example extends AbstractCommand
         
     }
 
-    public function execute()
+    public function execute(AbstractOutput $output)
     {
        
     }
@@ -125,6 +128,7 @@ php jarvis example arg1 arg2 arg3 --option1 --option2=value1 --option2=value2
 namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
+use Jarvis\Vendor\Output\AbstractOutput;
 
 class Example extends AbstractCommand
 {
@@ -140,7 +144,7 @@ class Example extends AbstractCommand
              ->addOption('job', 'есть работа');
     }
 
-    public function execute()
+    public function execute(AbstractOutput $output)
     {
       
     }
@@ -157,14 +161,16 @@ class Example extends AbstractCommand
 - есть работа (значение необязательно)
 
 ### Метод execute
-Осталось сделать метод execute, который будет реализовывать логику команды на основе введённых аргументов и опций:
+Осталось сделать метод execute, который будет реализовывать логику команды на основе введённых аргументов и опций.
+Этот метод принимает на вход экземпляр наследника класса AbstractOutput с помощью которого осуществляется вывод
+информации в консоль/браузер.
 ```
 <?php
 
 namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
-use Jarvis\Vendor\Output\Message;
+use Jarvis\Vendor\Output\AbstractOutput;
 
 class Example extends AbstractCommand
 {
@@ -180,21 +186,21 @@ class Example extends AbstractCommand
              ->addOption('job', 'есть работа');
     }
 
-    public function execute()
+    public function execute(AbstractOutput $output)
     {
-        Message::success('Результат выполнения команды:');
-        Message::info("Имя: ".$this->getArgument('name'));
+        $output->success('Результат выполнения команды:');
+        $output->info("Имя: ".$this->getArgument('name'));
         if ($this->hasArgument('surname')){
-            Message::info("Фамилия: ".$this->getArgument('surname'));
+            $output->info("Фамилия: ".$this->getArgument('surname'));
         }
         if ($this->hasArgument('second-name')){
-            Message::info("Отчество: ".$this->getArgument('second-name'));
+            $output->info("Отчество: ".$this->getArgument('second-name'));
         }
         if ($this->hasOption('excellence')){
-            Message::info("Положительные качества: ". implode(', ', $this->getOption('excellence')));
+            $output->info("Положительные качества: ". implode(', ', $this->getOption('excellence')));
         }
         if ($this->hasOption('job')){
-            Message::info("Работа: есть");
+            $output->info("Работа: есть");
         }
     }
 }
@@ -232,8 +238,8 @@ php jarvis example василий --excellence='веселый парень' --e
 ```
 <?php
 
-use Jarvis\Vendor\Output\Message;
 use Jarvis\Vendor\Input\ArrayInput;
+use Jarvis\Vendor\Output\Browser;
 use Jarvis\Vendor\Application;
 
 try {
@@ -253,10 +259,11 @@ try {
             'job'        => null
         ]
     ]);
-    $app = new Application($input);
+    $output = new Browser();
+    $app = new Application($input, $output);
     $app->run();
 } catch (\Exception $e) {
-    Message::error($e->getMessage());
+    (new Browser())->error($e->getMessage());
 }
 ```
 Здесь команда, аргументы и опции определяются в массиве, который передаётся в конструктор класса ArrayInput.
@@ -274,8 +281,8 @@ try {
 ```
 
 ## Вывод информации
-Вывод информации производится за счет универсального класса Message, который содержит в себе
-следующие статические методы:
+Вывод информации производится за счет универсального класса-наследника AbstractOutput, который содержит в себе
+следующие методы:
 - info
 - error
 - success
@@ -287,7 +294,8 @@ try {
 - зеленый
 - желтый
 
-При этом неважно, где происходит вывод информации - в консоли или в браузере.
+Для вывода в консоль используется класс Console.
+Для вывода в браузер - класс Browser.
 
 ## Справочная команда help
 В Jarvis по умолчанию встроена команда help, с помощью которой можно получить информацию о списке команд, которые 
