@@ -2,10 +2,12 @@
 
 namespace Jarvis\Vendor\Exception;
 
+use Exception;
+
 /**
- * Этот класс ошибок применяется при реализации неверной конфигурации команды в методе configure()
+ * Ошибки этого класса выводятся при неверной конфигурации команды в методе configure()
  */
-class ConfigException extends \Exception
+class ConfigException extends Exception
 {
     public function __construct($message = "", $code = 0)
     {

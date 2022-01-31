@@ -2,12 +2,15 @@
 
 namespace Jarvis\Vendor\Command;
 
+use Exception;
 use ReflectionClass;
 use ReflectionException;
 use Jarvis\Vendor\Config;
-use Exception;
 use Jarvis\Vendor\Exception\ConfigException;
 
+/**
+ * Реестр команд
+ */
 class Registry
 {
     private static $commands = [];
@@ -22,6 +25,12 @@ class Registry
 
     }
 
+    /**
+     * Регистрирует все команды из раздела 'commands' конфигурационного файла config.php
+     * @throws ConfigException
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public static function init()
     {
         if (!empty(self::$commands)) {
@@ -33,59 +42,72 @@ class Registry
     }
 
     /**
-     * Регистрирует команду по её названию
+     * Регистрирует команду по классу, который её описывает
      * @param string $commandClass
      * @throws ConfigException
      * @throws ReflectionException
      */
     private static function register(string $commandClass)
     {
-        $reflectionClass = new ReflectionClass($commandClass);
-        if (!$reflectionClass->isSubclassOf(AbstractCommand::class)) {
-            throw new ConfigException("Класс команды '$commandClass' нельзя зарегистрировать, т.к. он не является потомком класса AbstractCommand");
-        }
-        if (empty($commandClass::$name)) {
-            throw new ConfigException("В классе команды '$commandClass' не задано название");
-        }
-        if (array_key_exists($commandClass::$name, self::$commands)) {
-            $existClass = self::$commands[$commandClass::$name];
-            throw new ConfigException("Команда c названием '$commandClass::$name' уже зарегистрирована в классе '$existClass'");
-        }
         /**
          * @var AbstractCommand $commandInstance
          */
         $commandInstance = new $commandClass();
         $commandInstance->configure();
-        self::$commands[$commandClass::$name] = $commandInstance;
+
+        // Проверка на принадлежность к классу AbstractCommand
+        $reflectionClass = new ReflectionClass($commandClass);
+        if (!$reflectionClass->isSubclassOf(AbstractCommand::class)) {
+            throw new ConfigException("Класс команды '$commandClass' нельзя зарегистрировать, т.к. он не "
+                . "является потомком класса AbstractCommand");
+        }
+
+        // Проверка на существование команды с таким именем
+        $commandName = $commandInstance->getName();
+        if (self::hasCommand($commandName)) {
+            $existClass = get_class(self::getCommandInstance($commandName));
+            throw new ConfigException("Класс команды '$commandClass' нельзя зарегистрировать, т.к. команда c "
+                . "названием '$commandName' уже зарегистрирована в классе '$existClass'");
+        }
+
+        self::$commands[$commandInstance->getName()] = $commandInstance;
     }
 
+    /**
+     * Возвращает экземпляр зарегистрированной команды по ее названию
+     * @param $name
+     * @return mixed|null
+     */
     public static function getCommandInstance($name)
     {
         return self::$commands[$name] ?: null;
     }
 
+    /**
+     * Проверяет зарегистрирована ли команда
+     * @param $name
+     * @return bool
+     */
     public static function hasCommand($name): bool
     {
         return self::getCommandInstance($name) !== null;
     }
 
+    /**
+     * Проверяет, есть ли вообще зарегистрированные команды
+     * @return bool
+     */
     public static function hasCommands(): bool
     {
         return !empty(self::$commands);
     }
 
+    /**
+     * Возвращает зарегистрированные команды в виде массива
+     * @return array
+     */
     public static function getCommands(): array
     {
         return self::$commands;
-    }
-
-    public static function checkCommand($command)
-    {
-        if (empty($command)){
-            throw new Exception("Введите команду для выполнения");
-        }
-        if (!Registry::hasCommand($command)){
-            throw new Exception("Класс, описывающий команду '{$command}', не найден");
-        }
     }
 }

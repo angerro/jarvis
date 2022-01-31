@@ -4,16 +4,16 @@ namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
 use Jarvis\Vendor\Command\Registry;
+use Jarvis\Vendor\Exception\FormatException;
 use Jarvis\Vendor\Output\AbstractOutput;
 
 class Help extends AbstractCommand
 {
-    public static $name = 'help';
-    public static $description = 'Команда для отображения информации о командах Jarvis';
-
     public function configure()
     {
-        $this->addArgument('name', 'имя команды', false);
+        $this->setName('help')
+             ->setDescription('Команда для отображения информации о командах Jarvis')
+             ->addArgument('name', 'имя команды', false);
     }
 
     public function validate()
@@ -21,7 +21,7 @@ class Help extends AbstractCommand
         if ($this->hasArgument('name')) {
             $command = $this->getArgument('name');
             if (!Registry::hasCommand($command)){
-                throw new \Exception("Класс, описывающий команду '$command', не найден");
+                throw new FormatException("Класс, описывающий команду '$command', не найден");
             }
         }
     }
@@ -46,7 +46,7 @@ class Help extends AbstractCommand
             $output->success("Доступные команды:");
         }
         foreach (Registry::getCommands() as $command) {
-            $output->info("- {$command::$name}: {$command::$description}");
+            $output->info("- {$command->getName()}: {$command->getDescription()}");
         }
         $output->success('Для вывода подробной информации о команде можно воспользоваться следующим вызовом: "php jarvis {название команды} help" ');
     }
@@ -61,22 +61,22 @@ class Help extends AbstractCommand
 
         $output->success("Команда $command");
         $output->success("----------------");
-        if ($commandInstance::$description) {
-            $output->success($commandInstance::$description);
+        if ($commandInstance->getDescription()) {
+            $output->success($commandInstance->getDescription());
         }
         if (!empty($commandInstance->getArguments())) {
             $output->success("Аргументы:");
             foreach ($commandInstance->getArguments() as $key => $argument) {
                 $isRequired = $argument->isRequired() ? '(обязательный)' : '(необязательный)';
                 $number = $key + 1;
-                $output->info("{$number}. {$argument->getName()} {$isRequired}: {$argument->getDescription()}");
+                $output->info("$number. {$argument->getName()} $isRequired: {$argument->getDescription()}");
             }
         }
         if (!empty($commandInstance->getOptions())) {
             $output->success("Опции:");
             foreach ($commandInstance->getOptions() as $option) {
                 $isValueRequired = $option->isValueRequired() ? '(значение обязательно)' : '(значение необязательно)';
-                $output->info("-- {$option->getName()} {$isValueRequired}: {$option->getDescription()}");
+                $output->info("-- {$option->getName()} $isValueRequired: {$option->getDescription()}");
             }
         }
     }

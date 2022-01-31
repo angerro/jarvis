@@ -24,6 +24,6 @@ try {
     $output = new Browser();
     $app = new Application($input, $output);
     $app->run();
-} catch (\Exception $e) {
+} catch (Exception $e) {
     (new Browser())->error($e->getMessage());
 }

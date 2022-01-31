@@ -7,12 +7,11 @@ use Jarvis\Vendor\Output\AbstractOutput;
 
 class Example extends AbstractCommand
 {
-    public static $name = 'example';
-    public static $description = 'Команда для демонстрации работы консольного приложения Jarvis';
-
     public function configure()
     {
-        $this->addArgument('name', 'имя')
+        $this->setName('example')
+             ->setDescription('Команда для демонстрации работы консольного приложения Jarvis')
+             ->addArgument('name', 'имя')
              ->addArgument('surname', 'фамилия', false)
              ->addArgument('second-name', 'отчество', false)
              ->addOption('excellence', 'положительные качества', true)

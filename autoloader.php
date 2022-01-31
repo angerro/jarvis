@@ -10,7 +10,7 @@ spl_autoload_register(function ($class) {
         if (file_exists($classPath)) {
             require $classPath;
         } else {
-            throw new \Exception("Ошибка загрузки '$classPath'");
+            throw new Exception("Ошибка загрузки '$classPath'");
         }
     }
 });
