@@ -8,45 +8,44 @@ use Jarvis\Vendor\Exception\ConfigException;
 use Jarvis\Vendor\Input\CommandData;
 use Jarvis\Vendor\Input\Argument;
 use Jarvis\Vendor\Input\Option;
-use Jarvis\Vendor\Config;
 use Jarvis\Vendor\Output\AbstractOutput;
 
-//todo: сделать метод hasCommand
+//todo: добавить новые Exception-ы
 
 abstract class AbstractCommand
 {
     // Название команды. Обязательно для реализации в классах-наследниках.
-    public static $name;
+    public static $name = '';
     // Описание команды
-    public static $description;
+    public static $description = '';
 
-    // Экземпляр CommandData
+    /**
+     * Экземпляр CommandData
+     * @var CommandData
+     */
     private $commandData;
-    // Массив аргументов, полученных из метода конфигурации команды
+    // Массив аргументов
     private $arguments = [];
-    // Ассоциативный массив опций, полученных из метода конфигурации команды
+    // Ассоциативный массив опций
     private $options = [];
 
     /**
-     * Конструктор экземпляра команды
-     * @param CommandData $commandData - экземпляр входящей команды
-     * @param bool $controlData - запускать ли метод валидации введенной команды
-     * @throws ConfigException
+     * Запускает команду с предварительной валидацией команды
+     * @param CommandData $commandData
+     * @param AbstractOutput $output
+     * @throws Exception
      */
-    public function __construct(CommandData $commandData, bool $controlData = true)
+    public function run(CommandData $commandData, AbstractOutput $output)
     {
         $this->commandData = $commandData;
-        if (empty(static::$name)) {
-            throw new ConfigException("Не задано название команды");
-        }
-        $this->configure();
-        if ($controlData) {
-            $this->controlData();
-        }
+        $this->controlData();
+        $this->execute($output);
     }
 
     /**
-     * Метод в котором конфигурируется команда: регистрируются аргументы и опции.
+     * Метод в котором регистрируются возможные аргументы и опции с помощью методов
+     * - addArgument
+     * - addOption
      * Реализация этого метода обязательна в классах-наследниках.
      * @return mixed
      */
@@ -61,46 +60,7 @@ abstract class AbstractCommand
     abstract public function execute(AbstractOutput $output);
 
     /**
-     * Возвращает объявленные аргументы или опции команды
-     * @param string $type
-     * @return array|void
-     * @throws Exception
-     */
-    protected function getConfig(string $type)
-    {
-        if (in_array($type, ['arguments', 'options'])) {
-            return $this->$type;
-        }
-        throw new ConfigException("Ошибка аргумента команды getConfig");
-    }
-
-    /**
-     * Возвращает экземпляр CommandData
-     * @return CommandData
-     */
-    protected function getCommandData(): CommandData
-    {
-        return $this->commandData;
-    }
-
-    /**
-     * Получение класса команды по ее названию
-     * @param $command - название команды
-     * @return string
-     * @throws Exception
-     */
-    public static function getCommandClass($command): string
-    {
-        foreach (Config::get('commands') as $commandClass) {
-            if ($commandClass::$name === $command) {
-                return $commandClass;
-            }
-        }
-        throw new Exception("Класс, описывающий команду '{$command}', не найден");
-    }
-
-    /**
-     * Объявляет аргумент на этапе конфигурации команды.
+     * Регистрирует аргумент команды.
      * Обязательный аргумент не может быть объявлен после необязательного.
      * @param string $name - название
      * @param string $description - описание
@@ -134,10 +94,19 @@ abstract class AbstractCommand
     {
         foreach ($this->arguments as $key => $argument) {
             if ($argument->getName() === $argumentName) {
-                return $this->commandData->arguments[$key];
+                return $this->commandData->getArguments()[$key];
             }
         }
         return null;
+    }
+
+    /**
+     * Возвращает массив зарегистрированных аргументов
+     * @return array
+     */
+    protected function getArguments(): array
+    {
+        return $this->arguments;
     }
 
     /**
@@ -162,7 +131,7 @@ abstract class AbstractCommand
     }
 
     /**
-     * Объявляет опцию на этапе конфигурации команды.
+     * Регистрирует опцию команды
      * @param string $name - название
      * @param string $description - описание
      * @param bool $valueRequired - обязательность заполнения значения
@@ -187,12 +156,21 @@ abstract class AbstractCommand
     {
         if (!$this->hasOption($optionName)) {
             $option = null;
-        } else if (count($this->commandData->options[$optionName]) === 1) {
-            $option = $this->commandData->options[$optionName][0];
+        } else if (count($this->commandData->getOptions()[$optionName]) === 1) {
+            $option = $this->commandData->getOptions()[$optionName][0];
         } else {
-            $option = $this->commandData->options[$optionName];
+            $option = $this->commandData->getOptions()[$optionName];
         }
         return $option;
+    }
+
+    /**
+     * Возвращает массив зарегистрированных опций
+     * @return array
+     */
+    protected function getOptions(): array
+    {
+        return $this->options;
     }
 
     /**
@@ -202,7 +180,7 @@ abstract class AbstractCommand
      */
     protected function hasOption(string $optionName): bool
     {
-        return array_key_exists($optionName, $this->commandData->options);
+        return array_key_exists($optionName, $this->commandData->getOptions());
     }
 
     /**
@@ -216,20 +194,21 @@ abstract class AbstractCommand
     private function controlData()
     {
         // Ищем необъявленные аргументы
-        if (count($this->commandData->arguments) > count($this->arguments)) {
-            $lastCommandArgument = end($this->commandData->arguments);
+        if (count($this->commandData->getArguments()) > count($this->arguments)) {
+            $arguments = $this->commandData->getArguments();
+            $lastCommandArgument = end($arguments);
             throw new FormatException("Указан необъявленный аргумент со значением '{$lastCommandArgument}'");
         }
 
         // Ищем неопределённые обязательные аргументы
         foreach ($this->getRequiredArguments() as $key => $argument) {
-            if (!array_key_exists($key, $this->commandData->arguments)) {
+            if (!array_key_exists($key, $this->commandData->getArguments())) {
                 throw new FormatException("Обязательный аргумент '{$argument->getName()}' не определен");
             }
         }
 
         // Ищем необъявленные опции
-        foreach (array_keys($this->commandData->options) as $commandOptionName) {
+        foreach (array_keys($this->commandData->getOptions()) as $commandOptionName) {
             if (!array_key_exists($commandOptionName, $this->options)){
                 throw new FormatException("Указана необъявленная опция '{$commandOptionName}'");
             }
@@ -237,11 +216,11 @@ abstract class AbstractCommand
 
         // Ищем неопределённые/пустые значения опций (равные '' или null),
         // значения которых должно быть определено
-        foreach (array_keys($this->commandData->options) as $commandOptionName){
+        foreach (array_keys($this->commandData->getOptions()) as $commandOptionName){
             foreach ($this->options as $option) {
                 if ($commandOptionName === $option->getName() &&
                     $option->isValueRequired() &&
-                    in_array(null, $this->commandData->options[$commandOptionName])){
+                    in_array(null, $this->commandData->getOptions()[$commandOptionName])){
                     throw new FormatException("Не указано значение опции '{$commandOptionName}'");
                 }
             }

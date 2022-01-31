@@ -3,8 +3,8 @@
 namespace Jarvis\Commands;
 
 use Jarvis\Vendor\Command\AbstractCommand;
+use Jarvis\Vendor\Command\Registry;
 use Jarvis\Vendor\Output\AbstractOutput;
-use Jarvis\Vendor\Config;
 
 class Help extends AbstractCommand
 {
@@ -16,54 +16,65 @@ class Help extends AbstractCommand
         $this->addArgument('name', 'имя команды', false);
     }
 
+    public function validate()
+    {
+        if ($this->hasArgument('name')) {
+            $command = $this->getArgument('name');
+            if (!Registry::hasCommand($command)){
+                throw new \Exception("Класс, описывающий команду '$command', не найден");
+            }
+        }
+    }
+
     public function execute(AbstractOutput $output)
     {
         if ($this->hasArgument('name')) {
             $this->help($this->getArgument('name'), $output);
-        } else {
-            $this->list($output);
+            return;
         }
+
+        $this->list($output);
     }
 
     private function list(AbstractOutput $output)
     {
         $output->success("Консольная утилита Jarvis");
         $output->success("-------------------------");
-        if (empty(Config::get('commands'))) {
+        if (!Registry::hasCommands()) {
             $output->success('Ни одной команды не зарегистрировано. Для начала работы создайте хотя бы одну команду.');
         } else {
             $output->success("Доступные команды:");
         }
-        foreach (Config::get('commands') as $commandClass) {
-            $output->info("- {$commandClass::$name}: {$commandClass::$description}");
+        foreach (Registry::getCommands() as $command) {
+            $output->info("- {$command::$name}: {$command::$description}");
         }
         $output->success('Для вывода подробной информации о команде можно воспользоваться следующим вызовом: "php jarvis {название команды} help" ');
     }
 
     private function help($command, AbstractOutput $output)
     {
-        // Определяем класс команды
-        $commandClass = AbstractCommand::getCommandClass($command);
-        // Создаем экземпляр команды
-        $commandDataClass= get_class($this->getCommandData());
-        $commandEntity = new $commandClass(new $commandDataClass([]), false);
+        // Получим экземпляр команды
+        /**
+         * @var AbstractCommand $commandInstance
+         */
+        $commandInstance = Registry::getCommandInstance($command);
 
         $output->success("Команда $command");
         $output->success("----------------");
-        if ($commandClass::$description) {
-            $output->success($commandClass::$description);
+        if ($commandInstance::$description) {
+            $output->success($commandInstance::$description);
         }
-        if (!empty($commandEntity->getConfig('arguments'))) {
+        if (!empty($commandInstance->getArguments())) {
             $output->success("Аргументы:");
-            foreach ($commandEntity->getConfig('arguments') as $key => $argument) {
+            foreach ($commandInstance->getArguments() as $key => $argument) {
                 $isRequired = $argument->isRequired() ? '(обязательный)' : '(необязательный)';
                 $number = $key + 1;
                 $output->info("{$number}. {$argument->getName()} {$isRequired}: {$argument->getDescription()}");
             }
         }
-        if (!empty($commandEntity->getConfig('options'))) {
+        if (!empty($commandInstance->getOptions())) {
             $output->success("Опции:");
-            foreach ($commandEntity->getConfig('options') as $option) {
+            foreach ($commandInstance->getOptions() as $option) {
                 $isValueRequired = $option->isValueRequired() ? '(значение обязательно)' : '(значение необязательно)';
                 $output->info("-- {$option->getName()} {$isValueRequired}: {$option->getDescription()}");
             }

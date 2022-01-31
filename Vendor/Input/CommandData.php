@@ -4,9 +4,9 @@ namespace Jarvis\Vendor\Input;
 
 abstract class CommandData
 {
-    public $command = null;
-    public $arguments = [];
-    public $options = [];
+    protected $command = null;
+    protected $arguments = [];
+    protected $options = [];
 
     public function __construct(array $params)
     {
@@ -14,4 +14,19 @@ abstract class CommandData
     }
 
     abstract protected function parse(array $params);
+
+    public function getCommand()
+    {
+        return $this->command;
+    }
+
+    public function getArguments(): array
+    {
+        return $this->arguments;
+    }
+
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
 }

@@ -8,21 +8,21 @@ abstract class AbstractOutput
 
     public function info(string $str)
     {
-        static::write($str);
+        $this->write($str);
     }
 
     public function error(string $str)
     {
-        static::write($str, 'error');
+        $this->write($str, 'error');
     }
 
     public function success(string $str)
     {
-        static::write($str, 'success');
+        $this->write($str, 'success');
     }
 
     public function warning(string $str)
     {
-        static::write($str, 'warning');
+        $this->write($str, 'warning');
     }
 }
