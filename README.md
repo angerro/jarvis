@@ -24,7 +24,7 @@
 
 `namespace` класса должен соответствовать той директории, где этот класс располагается: `Jarvis\Commands`
 
-```
+```php
 <?php
 
 namespace Jarvis\Commands;
@@ -42,7 +42,7 @@ class Example extends AbstractCommand
 ### Метод configure
 
 Для начала определим имя команды и её описание:
-```
+```php
 <?php
 
 namespace Jarvis\Commands;
@@ -73,7 +73,7 @@ class Example extends AbstractCommand
 Опция - это именованный параметр команды. При запуске команды из консоли опция пишется с префиксом в виде двух дефисов.
 
 К примеру, в команде
-```
+```bash
 php jarvis example arg1 arg2 arg3 --option1 --option2=value1 --option2=value2
 ```
 аргументами являются параметры arg1, arg2, arg3, а опциями option1 и option2.
@@ -116,7 +116,7 @@ php jarvis example arg1 arg2 arg3 --option1 --option2=value1 --option2=value2
 - обязательность указания значения
 
 Определим аргументы и опции в методе configure для реализации нашей задумки:
-```
+```php
 <?php
 
 namespace Jarvis\Commands;
@@ -154,7 +154,7 @@ class Example extends AbstractCommand
 информации в консоль/браузер.
 
 Реализуем его:
-```
+```php
 <?php
 
 namespace Jarvis\Commands;
@@ -211,7 +211,7 @@ class Example extends AbstractCommand
 
 ## Запуск команды в консоли
 Попробуем запустить нашу команду:
-```
+```bash
 php jarvis example василий --excellence='веселый парень' --excellence='любит борщ' --job
 ```
 На выходе получим:
@@ -225,7 +225,7 @@ php jarvis example василий --excellence='веселый парень' --e
 ## Запуск команды в php коде
 Если необходимо запустить команду не из консоли, а прямо в php коде, чтобы результат
 выполнения отображался в браузере можно поступить так:
-```
+```php
 <?php
 
 use Jarvis\Vendor\Input\ArrayInput;
@@ -291,10 +291,10 @@ try {
 ## Справочная команда help
 В Jarvis по умолчанию встроена команда `help`, с помощью которой можно получить информацию о списке зарегистрированных 
 команд:
-```
+```bash
 php jarvis help
 ```
 либо о какой-то конкретной команде:
-```
+```bash
 php jarvis help example
 ```
