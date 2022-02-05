@@ -2,6 +2,7 @@
 
 namespace Jarvis\Vendor;
 
+use Exception;
 use Jarvis\Vendor\Command\Registry;
 use Jarvis\Vendor\Exception\FormatException;
 use Jarvis\Vendor\Input\CommandData;
@@ -22,12 +23,15 @@ class Application
 
     /**
      * @throws ReflectionException
-     * @throws Exception\ConfigException
+     * @throws Exception
      */
     public function __construct(CommandData $params, AbstractOutput $output)
     {
         $this->commandData = $params;
         $this->output = $output;
+        // Инициализация конфига
+        Config::init(include dirname(__DIR__) . DIRECTORY_SEPARATOR . 'config.php');
+        // Инициализация реестра команд
         Registry::init();
     }
 

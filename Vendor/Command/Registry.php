@@ -36,7 +36,9 @@ class Registry
         if (!empty(self::$commands)) {
             throw new Exception('Реестр команд уже был проинициализирован');
         }
+
         foreach (Config::get('commands') as $commandClass) {
+            spl_autoload_call($commandClass);
             self::register($commandClass);
         }
     }
